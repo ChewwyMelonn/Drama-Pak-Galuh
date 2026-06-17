@@ -1,12 +1,5 @@
-// ============================================================
 // SOUNDBOARD CONFIGURATION - CUSTOMIZE HERE
-// ============================================================
-// Add or modify sounds by editing the soundList array below
-// Sound files should be placed in the /sounds/ folder
-// 
 // Format: { name: "Display Name", file: "filename.mp3" }
-// Example: { name: "Laugh", file: "laugh.mp3" }
-// ============================================================
 
 const soundList = [
     { name: "Suara 1", file: "sound1.mp3" },
@@ -18,10 +11,6 @@ const soundList = [
     { name: "Suara 7", file: "sound7.mp3" },
     { name: "Suara 8", file: "sound8.mp3" },
 ];
-
-// ============================================================
-// SOUNDBOARD APPLICATION
-// ============================================================
 
 class Soundboard {
     constructor() {
@@ -40,7 +29,6 @@ class Soundboard {
 
     createSoundElements() {
         const audioContainer = document.getElementById('audio-container');
-        
         soundList.forEach((sound, index) => {
             const audio = document.createElement('audio');
             audio.id = `audio-${index}`;
@@ -62,19 +50,12 @@ class Soundboard {
     createSoundButtons() {
         const soundboard = document.querySelector('.soundboard');
         soundboard.innerHTML = '';
-        
         this.sounds.forEach((sound) => {
-            const button = document.createElement('div');
+            const button = document.createElement('button');
             button.className = 'sound-button';
-            button.dataset.sound = sound.index;
-            button.innerHTML = `
-                <span class="button-name">${sound.name}</span>
-                <span class="duration">00:00</span>
-            `;
-            
+            button.innerHTML = sound.name;
             button.addEventListener('click', () => this.playSound(sound.index));
             soundboard.appendChild(button);
-            
             sound.button = button;
         });
     }
@@ -82,12 +63,10 @@ class Soundboard {
     playSound(index) {
         const sound = this.sounds[index];
         
-        // Stop previous sound if playing
         if (this.currentlyPlaying !== null && this.currentlyPlaying !== index) {
             this.stopSound(this.currentlyPlaying);
         }
         
-        // If clicking the same button, toggle play/pause
         if (this.currentlyPlaying === index) {
             if (sound.audio.paused) {
                 sound.audio.play();
@@ -97,13 +76,10 @@ class Soundboard {
             return;
         }
         
-        // Play new sound
         this.currentlyPlaying = index;
         sound.audio.currentTime = 0;
         sound.audio.volume = this.currentVolume / 100;
         sound.audio.play();
-        
-        // Update UI
         this.updatePlayingDisplay();
         sound.button.classList.add('playing');
     }
@@ -122,7 +98,7 @@ class Soundboard {
             sound.button.classList.remove('playing');
         });
         this.currentlyPlaying = null;
-        document.getElementById('playing-sound').textContent = 'None';
+        document.getElementById('playing-sound').textContent = '-';
         document.getElementById('playing-time').textContent = '00:00';
         document.getElementById('total-time').textContent = '00:00';
         document.getElementById('progress-fill').style.width = '0%';
@@ -133,7 +109,7 @@ class Soundboard {
         sound.button.classList.remove('playing');
         if (this.currentlyPlaying === index) {
             this.currentlyPlaying = null;
-            document.getElementById('playing-sound').textContent = 'None';
+            document.getElementById('playing-sound').textContent = '-';
             document.getElementById('progress-fill').style.width = '0%';
         }
     }
@@ -145,17 +121,14 @@ class Soundboard {
 
     updateProgress(index) {
         if (this.currentlyPlaying !== index) return;
-        
         const sound = this.sounds[index];
         const audio = sound.audio;
         
         if (audio.duration) {
             const currentTime = this.formatTime(audio.currentTime);
             const duration = this.formatTime(audio.duration);
-            
             document.getElementById('playing-time').textContent = currentTime;
             document.getElementById('total-time').textContent = duration;
-            
             const progressPercent = (audio.currentTime / audio.duration) * 100;
             document.getElementById('progress-fill').style.width = progressPercent + '%';
         }
@@ -165,16 +138,14 @@ class Soundboard {
         const sound = this.sounds[index];
         const duration = this.formatTime(sound.audio.duration);
         if (sound.button) {
-            sound.button.querySelector('.duration').textContent = duration;
+            sound.button.title = duration;
         }
     }
 
     formatTime(seconds) {
         if (isNaN(seconds)) return '00:00';
-        
         const mins = Math.floor(seconds / 60);
         const secs = Math.floor(seconds % 60);
-        
         return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
     }
 
@@ -192,25 +163,19 @@ class Soundboard {
     }
 
     attachEventListeners() {
-        // Stop All button
         document.getElementById('stop-all-btn').addEventListener('click', () => {
             this.stopAllSounds();
         });
 
-        // Volume button toggle
         document.getElementById('volume-btn').addEventListener('click', () => {
-            const volumeControl = document.getElementById('volume-control');
-            volumeControl.classList.toggle('active');
+            document.getElementById('volume-control').classList.toggle('active');
         });
 
-        // Volume slider
         document.getElementById('volume-slider').addEventListener('input', (e) => {
             this.setVolume(e.target.value);
         });
 
-        // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-            // Spacebar to stop all sounds
             if (e.code === 'Space') {
                 e.preventDefault();
                 this.stopAllSounds();
@@ -219,7 +184,6 @@ class Soundboard {
     }
 }
 
-// Initialize soundboard when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     new Soundboard();
 });
